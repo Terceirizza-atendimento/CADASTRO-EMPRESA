@@ -1,4 +1,4 @@
-<title>Dossiê CNPJ</title>
+<title>Cadastro de Empresa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -215,7 +215,7 @@
       </div>
       <div>
         <p class="kicker">Terceirizza Contabilidade</p>
-        <h1>Dossiê de Abertura<br/>e Alteração de Empresa</h1>
+        <h1>Cadastro de Abertura<br/>e Alteração de Empresa</h1>
       </div>
     </div>
   </header>
@@ -800,7 +800,7 @@
   // ---- FINAL ----
   function buildSummary(){
     var lines = [];
-    lines.push("*DOSSIÊ CNPJ — Terceirizza Contabilidade*");
+    lines.push("*CADASTRO DE EMPRESA — Terceirizza Contabilidade*");
     lines.push(state.tipo==="alteracao" ? "Tipo: Alteração de empresa (CNPJ "+state.cnpjExistente+")" : "Tipo: Abertura de empresa nova");
     lines.push("");
     state.socios.forEach(function(s, i){
