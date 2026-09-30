@@ -325,6 +325,20 @@
     return "R$ " + parts[0] + "," + parts[1];
   }
 
+  // ---- field content validators ----
+  function hasLetter(v){ return /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(v||""); }
+  function isValidDateStr(v){
+    var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v||"");
+    if(!m) return false;
+    var day=parseInt(m[1],10), month=parseInt(m[2],10), year=parseInt(m[3],10);
+    if(month<1||month>12||day<1||day>31) return false;
+    if(year<1900||year>new Date().getFullYear()) return false;
+    return true;
+  }
+  function isValidEmail(v){
+    return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test((v||"").trim());
+  }
+
   // ---- step engine ----
   var steps = [];
 
@@ -347,13 +361,13 @@
       steps.push({ key:"quotas", section:"Sócios", render:renderQuotas, validate:validateQuotas });
     }
     steps.push({ key:"irpf", section:"Financeiro", render:renderIRPF, validate:validateIRPF });
-    steps.push({ key:"enderecoResidencial", section:"Endereço", render:renderEnderecoResidencial, validate:function(){ return !!state.enderecoResidencial.trim(); } });
+    steps.push({ key:"enderecoResidencial", section:"Endereço", render:renderEnderecoResidencial, validate:function(){ return !!state.enderecoResidencial.trim() && hasLetter(state.enderecoResidencial); } });
     steps.push({ key:"contato", section:"Contato", render:renderContato, validate:validateContato });
     steps.push({ key:"razaoSocial", section:"Empresa", render:renderRazaoSocial, validate:validateRazaoSocial });
     steps.push({ key:"enderecoComercial", section:"Endereço", render:renderEnderecoComercial, validate:validateEnderecoComercial });
     steps.push({ key:"atendimento", section:"Empresa", render:renderAtendimento, validate:validateAtendimento });
     steps.push({ key:"capital", section:"Financeiro", render:renderCapital, validate:function(){ return !!state.capitalSocial.trim(); } });
-    steps.push({ key:"atividades", section:"Empresa", render:renderAtividades, validate:function(){ return state.atividades.trim().length>3; } });
+    steps.push({ key:"atividades", section:"Empresa", render:renderAtividades, validate:function(){ return state.atividades.trim().length>3 && hasLetter(state.atividades); } });
     steps.push({ key:"faturamento", section:"Financeiro", render:renderFaturamento, validate:function(){ return !!state.faturamento; } });
     steps.push({ key:"final", section:"Concluir", render:renderFinal, validate:function(){ return true; } });
   }
@@ -506,9 +520,9 @@
       '</div>' +
       '<div class="row2">' +
         field("CPF *", '<input type="text" id="f_cpf" data-mono placeholder="000.000.000-00" inputmode="numeric">') +
-        field("RG *", '<input type="text" id="f_rg" data-mono placeholder="0000000000">') +
+        field("RG", '<input type="text" id="f_rg" data-mono placeholder="0000000000">') +
       '</div>' +
-      field("Órgão expedidor do RG *", '<input type="text" id="f_orgao" placeholder="Ex: SSP/RS">') +
+      field("Órgão expedidor do RG", '<input type="text" id="f_orgao" placeholder="Ex: SSP/RS">') +
       field("Título de eleitor",
         '<input type="text" id="f_titulo" data-mono placeholder="0000 0000 0000" '+(s.tituloNaoPossui?"disabled":"")+'>' +
         '<label class="checkbox-line"><input type="checkbox" id="f_semTitulo" '+(s.tituloNaoPossui?"checked":"")+'> Não possuo título de eleitor</label>'
@@ -566,12 +580,14 @@
   }
   function validateSocio(idx){
     var s = state.socios[idx];
-    if(!s.nome.trim() || !s.nascimento.trim() || !s.naturalidade.trim()) return false;
+    if(!s.nome.trim() || !hasLetter(s.nome)) return false;
+    if(!isValidDateStr(s.nascimento)) return false;
+    if(!s.naturalidade.trim() || !hasLetter(s.naturalidade)) return false;
     if(s.cpf.replace(/\D/g,"").length<11) return false;
-    if(!s.rg.trim() || !s.orgao.trim()) return false;
     if(!s.estadoCivil) return false;
     if((s.estadoCivil==="Casado(a)"||s.estadoCivil==="União estável") && !s.regime) return false;
-    if(!s.nomeMae.trim()) return false;
+    if(!s.nomeMae.trim() || !hasLetter(s.nomeMae)) return false;
+    if(!s.nomePaiNaoSei && s.nomePai.trim() && !hasLetter(s.nomePai)) return false;
     return true;
   }
 
@@ -690,7 +706,7 @@
   function renderContato(root){
     root.innerHTML =
       stepHeader("Contato comercial", "Esse e-mail e celular vão aparecer no Cartão CNPJ da empresa.") +
-      field("E-mail comercial *", '<input type="text" id="f_email" placeholder="nome@empresa.com">') +
+      field("E-mail comercial *", '<input type="text" id="f_email" placeholder="nome@gmail.com">', "Use um e-mail completo e válido (ex: nome@gmail.com, nome@hotmail.com, nome@outlook.com).") +
       field("Celular comercial *", '<input type="text" id="f_cel" data-mono placeholder="(00) 00000-0000" inputmode="numeric">') +
       navButtons();
     bindText("f_email","emailComercial");
@@ -699,7 +715,7 @@
     wireNav();
   }
   function validateContato(){
-    return /\S+@\S+\.\S+/.test(state.emailComercial) && state.celularComercial.replace(/\D/g,"").length>=10;
+    return isValidEmail(state.emailComercial) && state.celularComercial.replace(/\D/g,"").length>=10;
   }
 
   // ---- STEP: razão social ----
@@ -708,12 +724,16 @@
       stepHeader("Nome da empresa", "A Receita Federal pode recusar o primeiro nome — por isso pedimos uma segunda opção.") +
       field("Opção 1 de Razão Social *", '<input type="text" id="f_rs1" placeholder="Ex: Comércio Varejista Silva LTDA">') +
       field("Opção 2 de Razão Social *", '<input type="text" id="f_rs2" placeholder="Ex: Soluções Administrativas LTDA">') +
-      field("Nome Fantasia *", '<input type="text" id="f_fantasia" placeholder="Como o público vai conhecer a empresa">') +
+      field("Nome Fantasia", '<input type="text" id="f_fantasia" placeholder="Como o público vai conhecer a empresa">') +
       navButtons();
     bindText("f_rs1","razaoSocial1"); bindText("f_rs2","razaoSocial2"); bindText("f_fantasia","nomeFantasia");
     wireNav();
   }
-  function validateRazaoSocial(){ return state.razaoSocial1.trim() && state.razaoSocial2.trim() && state.nomeFantasia.trim(); }
+  function validateRazaoSocial(){
+    return state.razaoSocial1.trim() && hasLetter(state.razaoSocial1) &&
+      state.razaoSocial2.trim() && hasLetter(state.razaoSocial2) &&
+      (!state.nomeFantasia.trim() || hasLetter(state.nomeFantasia));
+  }
 
   // ---- STEP: endereço comercial ----
   function renderEnderecoComercial(root){
@@ -730,7 +750,7 @@
     m.addEventListener("input", function(){ m.value = m.value.replace(/[^\d.,]/g,""); state.metragem = m.value; save(); });
     wireNav();
   }
-  function validateEnderecoComercial(){ return state.enderecoComercial.trim() && state.iptu.trim() && state.metragem.trim(); }
+  function validateEnderecoComercial(){ return state.enderecoComercial.trim() && hasLetter(state.enderecoComercial) && state.iptu.trim() && state.metragem.trim(); }
 
   // ---- STEP: atendimento ----
   function renderAtendimento(root){
