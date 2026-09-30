@@ -239,6 +239,7 @@
 (function(){
   "use strict";
 
+  var SHEETS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxLFRkBArqsQieUpFlEuXMh6qDjaXUAfjmrrzeBCH_qJ56QOdyVva-ZDmI3BcnuFMG4ng/exec";
   var STORAGE_KEY = "terceirizza_dossie_cnpj_v1";
 
   var state = {
@@ -838,19 +839,31 @@
   function renderFinal(root){
     var summary = buildSummary();
     root.innerHTML =
-      stepHeader("Tudo pronto!", "Confira o resumo abaixo e envie para a Terceirizza pelo WhatsApp. Depois disso vamos começar o processo na Junta Comercial.") +
+      stepHeader("Tudo pronto!", "Confira o resumo abaixo e toque em Enviar. Suas respostas são salvas com segurança e a Terceirizza já começa o processo na Junta Comercial.") +
       '<textarea class="summary-box" id="summaryText" readonly rows="10">'+esc(summary).replace(/&#39;/g,"'")+'</textarea>' +
       '<div class="final-actions">' +
-        '<button type="button" class="btn btn-wa" id="btnWhats"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.33 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.85 9.85 0 0 0 12.04 2zm0 1.67c2.24 0 4.35.87 5.93 2.46a8.3 8.3 0 0 1 2.45 5.92c0 4.62-3.76 8.38-8.38 8.38a8.4 8.4 0 0 1-4.26-1.16l-.3-.18-3.14.82.84-3.06-.2-.32a8.3 8.3 0 0 1-1.28-4.44c0-4.62 3.76-8.42 8.34-8.42zm-3.2 4.36c-.16 0-.42.06-.64.3-.22.24-.85.83-.85 2.03 0 1.2.87 2.36.99 2.52.12.16 1.7 2.6 4.14 3.64.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28-.24-.12-1.44-.71-1.66-.79-.22-.08-.38-.12-.55.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.93-1.19-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.36-.76-1.86-.2-.48-.4-.42-.55-.42z"/></svg> Enviar pelo WhatsApp</button>' +
+        '<button type="button" class="btn btn-wa" id="btnSalvar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Enviar minha solicitação</button>' +
         '<button type="button" class="btn btn-ghost" id="btnCopy">Copiar resumo</button>' +
       '</div>' +
       '<div id="doneBadge"></div>' +
       (cur>0 ? '<div class="nav-row"><button type="button" class="btn btn-ghost" id="btnBack">Voltar</button></div>' : '');
 
-    document.getElementById("btnWhats").addEventListener("click", function(){
-      var url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(summary);
-      window.open(url, "_blank", "noopener");
-      showDone();
+    document.getElementById("btnSalvar").addEventListener("click", function(){
+      var btn = document.getElementById("btnSalvar");
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+      fetch(SHEETS_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(state)
+      }).then(function(){
+        try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+        showDone("Solicitação enviada com sucesso! A Terceirizza já recebeu seus dados e vai dar andamento ao processo.", true);
+      }).catch(function(){
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Enviar minha solicitação';
+        showDone("Não conseguimos enviar agora (verifique sua internet). Toque em Enviar de novo, ou copie o resumo e mande para a Terceirizza.", false);
+      });
     });
     document.getElementById("btnCopy").addEventListener("click", function(){
       var ta = document.getElementById("summaryText");
@@ -858,14 +871,14 @@
       var ok = false;
       try{ ok = document.execCommand("copy"); }catch(e){ ok = false; }
       if(!ok && navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(summary).then(function(){ showDone("Resumo copiado!"); }).catch(function(){});
+        navigator.clipboard.writeText(summary).then(function(){ showDone("Resumo copiado!", true); }).catch(function(){});
       } else if(ok){
-        showDone("Resumo copiado!");
+        showDone("Resumo copiado!", true);
       }
     });
-    function showDone(msg){
+    function showDone(msg, ok){
       document.getElementById("doneBadge").innerHTML =
-        '<div class="done-badge">✓ '+(msg||"Se o WhatsApp não abriu sozinho, cole o resumo copiado na conversa com a Terceirizza.")+'</div>';
+        '<div class="done-badge" style="'+(ok? "" : "background:var(--danger-wash);color:var(--danger)")+'">'+(ok?"✓ ":"⚠ ")+msg+'</div>';
     }
     wireNav();
   }
