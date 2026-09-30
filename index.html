@@ -339,6 +339,38 @@
     return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test((v||"").trim());
   }
 
+  // ---- CEP auto-lookup (ViaCEP) ----
+  function wireCepLookup(cepInputId, statusId, onFound){
+    var cepEl = document.getElementById(cepInputId);
+    var statusEl = document.getElementById(statusId);
+    cepEl.addEventListener("input", function(){
+      cepEl.value = maskCEPin(cepEl.value);
+      var digits = cepEl.value.replace(/\D/g,"");
+      if(digits.length===8){
+        statusEl.textContent = "Buscando endereço...";
+        statusEl.style.color = "var(--ink-faint)";
+        fetch("https://viacep.com.br/ws/"+digits+"/json/")
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            if(data.erro){
+              statusEl.textContent = "CEP não encontrado — preencha o endereço manualmente.";
+              statusEl.style.color = "var(--danger)";
+              return;
+            }
+            statusEl.textContent = "Endereço encontrado!";
+            statusEl.style.color = "var(--accent-strong)";
+            onFound(data);
+          })
+          .catch(function(){
+            statusEl.textContent = "Não conseguimos buscar agora — preencha o endereço manualmente.";
+            statusEl.style.color = "var(--danger)";
+          });
+      } else {
+        statusEl.textContent = "";
+      }
+    });
+  }
+
   // ---- step engine ----
   var steps = [];
 
@@ -403,12 +435,17 @@
     var root = document.getElementById("card");
     root.innerHTML = "";
     steps[cur].render(root, !!showErrors);
+    Array.prototype.forEach.call(root.querySelectorAll("input, select, textarea"), function(el){
+      el.setAttribute("autocomplete","off");
+    });
     updateProgress();
   }
 
   function field(labelText, inputHtml, hint, errId){
+    var idMatch = /id="([^"]+)"/.exec(inputHtml);
+    var forAttr = idMatch ? ' for="'+idMatch[1]+'"' : '';
     return '<div class="field">' +
-      '<label class="flabel">'+labelText+'</label>' +
+      '<label class="flabel"'+forAttr+'>'+labelText+'</label>' +
       inputHtml +
       (hint ? '<p class="hint">'+hint+'</p>' : '') +
       (errId ? '<p class="err" id="'+errId+'">Preencha este campo para continuar.</p>' : '') +
@@ -597,6 +634,7 @@
     if(state.cotas.length !== state.numSocios){
       state.cotas = names.map(function(_, i){ return state.cotas[i] || ""; });
     }
+    if(state.numSocios===1 && !state.cotas[0]){ state.cotas[0] = "100"; save(); }
     root.innerHTML =
       stepHeader("Administração e cotas", "Quem vai assinar como responsável perante a Receita Federal, e qual o percentual de participação de cada um?") +
       field("Sócio administrador *",
@@ -695,10 +733,16 @@
   function renderEnderecoResidencial(root){
     root.innerHTML =
       stepHeader("Endereço residencial", "Endereço completo do sócio administrador, com CEP.") +
+      field("CEP", '<input type="text" id="f_cep_res" data-mono inputmode="numeric" placeholder="00000-000">', 'Informe o CEP e preenchemos o resto. <span id="cepStatusRes"></span>') +
       field("Endereço residencial completo *", '<textarea id="f_end" placeholder="Rua, número, bairro, cidade/UF, CEP"></textarea>') +
       navButtons();
     var el = document.getElementById("f_end"); el.value = state.enderecoResidencial||"";
     el.addEventListener("input", function(){ state.enderecoResidencial = el.value; save(); });
+    wireCepLookup("f_cep_res","cepStatusRes", function(data){
+      el.value = data.logradouro+", nº ___, "+data.bairro+", "+data.localidade+"/"+data.uf+", CEP "+maskCEPin(data.cep.replace(/\D/g,""));
+      state.enderecoResidencial = el.value; save();
+      el.focus();
+    });
     wireNav();
   }
 
@@ -739,7 +783,8 @@
   function renderEnderecoComercial(root){
     root.innerHTML =
       stepHeader("Endereço do estabelecimento", "Onde a empresa vai funcionar.") +
-      field("Endereço comercial completo (com CEP) *", '<textarea id="f_endc" placeholder="Rua, número, bairro, cidade/UF, CEP"></textarea>') +
+      field("CEP", '<input type="text" id="f_cep_com" data-mono inputmode="numeric" placeholder="00000-000">', 'Informe o CEP e preenchemos o resto. <span id="cepStatusCom"></span>') +
+      field("Endereço comercial completo *", '<textarea id="f_endc" placeholder="Rua, número, bairro, cidade/UF, CEP"></textarea>') +
       '<div class="row2">' +
         field("Número do IPTU *", '<input type="text" id="f_iptu" data-mono>') +
         field("Metragem do imóvel (m²) *", '<input type="text" id="f_metragem" inputmode="numeric" placeholder="Ex: 45">') +
@@ -748,6 +793,12 @@
     bindText("f_endc","enderecoComercial"); bindText("f_iptu","iptu");
     var m = document.getElementById("f_metragem"); m.value = state.metragem||"";
     m.addEventListener("input", function(){ m.value = m.value.replace(/[^\d.,]/g,""); state.metragem = m.value; save(); });
+    var elEndc = document.getElementById("f_endc");
+    wireCepLookup("f_cep_com","cepStatusCom", function(data){
+      elEndc.value = data.logradouro+", nº ___, "+data.bairro+", "+data.localidade+"/"+data.uf+", CEP "+maskCEPin(data.cep.replace(/\D/g,""));
+      state.enderecoComercial = elEndc.value; save();
+      elEndc.focus();
+    });
     wireNav();
   }
   function validateEnderecoComercial(){ return state.enderecoComercial.trim() && hasLetter(state.enderecoComercial) && state.iptu.trim() && state.metragem.trim(); }
@@ -885,6 +936,7 @@
         body: JSON.stringify(state)
       }).then(function(){
         try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Enviado';
         showDone("Solicitação enviada com sucesso! A Terceirizza já recebeu seus dados e vai dar andamento ao processo.", true);
       }).catch(function(){
         btn.disabled = false;
