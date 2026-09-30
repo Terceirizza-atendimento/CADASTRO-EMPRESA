@@ -845,7 +845,7 @@
         '<button type="button" class="btn btn-ghost" id="btnCopy">Copiar resumo</button>' +
       '</div>' +
       '<div id="doneBadge"></div>' +
-      navButtons("Concluir");
+      (cur>0 ? '<div class="nav-row"><button type="button" class="btn btn-ghost" id="btnBack">Voltar</button></div>' : '');
 
     document.getElementById("btnWhats").addEventListener("click", function(){
       var url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(summary);
@@ -867,9 +867,6 @@
       document.getElementById("doneBadge").innerHTML =
         '<div class="done-badge">✓ '+(msg||"Se o WhatsApp não abriu sozinho, cole o resumo copiado na conversa com a Terceirizza.")+'</div>';
     }
-    var b = document.getElementById("btnNext");
-    b.textContent = "Concluir";
-    b.addEventListener("click", function(){ /* stays on final step */ });
     wireNav();
   }
 
