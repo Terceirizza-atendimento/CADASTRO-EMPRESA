@@ -1,0 +1,881 @@
+<title>Dossiê CNPJ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF0F6;
+    --paper:#FFFFFF;
+    --paper-2:#F4F5FA;
+    --ink:#12163F;
+    --ink-soft:#4D5280;
+    --ink-faint:#8388AD;
+    --line:#DBDEEC;
+    --accent:#171B54;
+    --accent-strong:#0B0E30;
+    --accent-contrast:#FFFFFF;
+    --accent-wash:#E6E7F5;
+    --gold:#D8912A;
+    --gold-wash:#FBF0DC;
+    --danger:#B3261E;
+    --danger-wash:#FBEAE9;
+    --shadow: 0 1px 2px rgba(18,22,63,.07), 0 12px 32px -16px rgba(18,22,63,.28);
+    --radius: 16px;
+    --focus: #D8912A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0A0C29;
+      --paper:#12153F;
+      --paper-2:#181C4E;
+      --ink:#EDEEFA;
+      --ink-soft:#B4B8DE;
+      --ink-faint:#7B7FA8;
+      --line:#2A2E63;
+      --accent:#E9AE4E;
+      --accent-strong:#F3C06B;
+      --accent-contrast:#181C4E;
+      --accent-wash:#26254A;
+      --gold:#E9AE4E;
+      --gold-wash:#2A2312;
+      --danger:#F0918C;
+      --danger-wash:#3A1E1D;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -16px rgba(0,0,0,.6);
+      --focus:#E9AE4E;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0A0C29;
+    --paper:#12153F;
+    --paper-2:#181C4E;
+    --ink:#EDEEFA;
+    --ink-soft:#B4B8DE;
+    --ink-faint:#7B7FA8;
+    --line:#2A2E63;
+    --accent:#E9AE4E;
+    --accent-strong:#F3C06B;
+    --accent-contrast:#181C4E;
+    --accent-wash:#26254A;
+    --gold:#E9AE4E;
+    --gold-wash:#2A2312;
+    --danger:#F0918C;
+    --danger-wash:#3A1E1D;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -16px rgba(0,0,0,.6);
+    --focus:#E9AE4E;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Public Sans', system-ui, -apple-system, Segoe UI, sans-serif;
+    padding: 20px 16px 48px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:640px; margin:0 auto; }
+
+  header.masthead{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+    margin-bottom:16px; padding: 4px 4px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brandmark{ display:flex; align-items:center; gap:10px; }
+  .seal{
+    width:42px;height:42px;border-radius:50%;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;flex:none;
+    box-shadow: var(--shadow); border:1px solid var(--line); overflow:hidden;
+  }
+  .seal img{width:100%;height:100%;object-fit:contain;display:block;}
+  h1{
+    font-family:'Fraunces', Georgia, serif; font-weight:600; font-size:1.28rem;
+    margin:0; letter-spacing:.2px; text-wrap:balance; line-height:1.15;
+  }
+  .kicker{
+    font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; color:var(--ink-faint);
+    font-weight:600; margin:0 0 2px;
+  }
+  .protocolo{ text-align:right; font-family:'IBM Plex Mono', monospace; font-size:.7rem; color:var(--ink-faint); line-height:1.4; }
+
+  .progress-rail{ margin: 4px 0 22px; }
+  .progress-track{
+    height:6px; border-radius:99px; background:var(--paper-2); overflow:hidden; border:1px solid var(--line);
+  }
+  .progress-fill{ height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-strong)); border-radius:99px; transition:width .35s ease; }
+  .progress-meta{ display:flex; justify-content:space-between; margin-top:8px; font-size:.76rem; color:var(--ink-soft); }
+  .progress-meta b{ color:var(--ink); font-weight:600; }
+  .section-chip{
+    display:inline-flex; align-items:center; gap:6px; background:var(--accent-wash); color:var(--accent-strong);
+    border-radius:99px; padding:3px 10px 3px 8px; font-size:.72rem; font-weight:600;
+  }
+
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    padding:24px 22px; box-shadow:var(--shadow);
+  }
+  .step-head{ margin-bottom:18px; }
+  .step-title{ font-family:'Fraunces', Georgia, serif; font-size:1.34rem; font-weight:600; margin:2px 0 6px; text-wrap:balance; }
+  .step-sub{ font-size:.86rem; color:var(--ink-soft); line-height:1.5; margin:0; }
+
+  .field{ margin-bottom:16px; }
+  .field:last-child{ margin-bottom:0; }
+  label.flabel{ display:block; font-size:.82rem; font-weight:600; margin-bottom:6px; color:var(--ink); }
+  .hint{ font-size:.74rem; color:var(--ink-faint); margin:4px 2px 0; line-height:1.4; }
+  input[type=text], input[type=tel], input[type=email], select, textarea{
+    width:100%; font:inherit; font-size:.95rem; padding:11px 12px; border-radius:11px;
+    border:1.5px solid var(--line); background:var(--paper-2); color:var(--ink);
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input[data-mono], select[data-mono]{ font-family:'IBM Plex Mono', monospace; letter-spacing:.02em; }
+  textarea{ resize:vertical; min-height:88px; font-family:inherit; }
+  input:focus, select:focus, textarea:focus{
+    outline:none; border-color:var(--focus); box-shadow:0 0 0 3px color-mix(in srgb, var(--focus) 25%, transparent);
+  }
+  input.invalid, select.invalid, textarea.invalid{ border-color:var(--danger); }
+  .err{ font-size:.74rem; color:var(--danger); margin-top:4px; display:none; }
+  .err.show{ display:block; }
+
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:480px){ .row2{ grid-template-columns:1fr; } }
+
+  .choice-grid{ display:grid; gap:10px; }
+  .choice{
+    display:flex; align-items:flex-start; gap:11px; border:1.5px solid var(--line); border-radius:13px;
+    padding:13px 14px; cursor:pointer; background:var(--paper-2); transition:border-color .15s, background .15s;
+  }
+  .choice:hover{ border-color:var(--accent); }
+  .choice input{ margin-top:3px; accent-color:var(--accent); width:16px; height:16px; flex:none; }
+  .choice .ctext strong{ display:block; font-size:.9rem; }
+  .choice .ctext span{ font-size:.76rem; color:var(--ink-soft); }
+  .choice.selected{ border-color:var(--accent); background:var(--accent-wash); }
+
+  .num-stepper{ display:flex; gap:8px; }
+  .num-btn{
+    flex:1; padding:14px 0; text-align:center; border-radius:12px; border:1.5px solid var(--line);
+    background:var(--paper-2); font-weight:700; font-size:1.05rem; cursor:pointer; font-family:'Fraunces',serif;
+  }
+  .num-btn.selected{ border-color:var(--accent); background:var(--accent); color:var(--accent-contrast); }
+
+  .socio-tag{
+    display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:.72rem;
+    background:var(--gold-wash); color:var(--gold); padding:3px 9px; border-radius:99px; font-weight:600; margin-bottom:10px;
+  }
+
+  .quota-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .quota-row .qname{ flex:1; font-size:.88rem; font-weight:500; }
+  .quota-row input{ width:88px; text-align:right; }
+  .quota-total{
+    display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding:10px 12px;
+    border-radius:10px; background:var(--paper-2); font-size:.84rem; font-weight:600;
+  }
+  .quota-total.ok{ color:var(--accent-strong); background:var(--accent-wash); }
+  .quota-total.bad{ color:var(--danger); background:var(--danger-wash); }
+
+  .nav-row{ display:flex; gap:10px; margin-top:22px; }
+  button.btn{
+    font:inherit; font-weight:700; border-radius:12px; padding:13px 18px; border:1.5px solid transparent;
+    cursor:pointer; font-size:.92rem; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn-primary{ background:var(--accent); color:var(--accent-contrast); flex:1; }
+  .btn-primary:hover{ background:var(--accent-strong); }
+  .btn-ghost{ background:transparent; border-color:var(--line); color:var(--ink-soft); }
+  .btn-ghost:hover{ border-color:var(--ink-faint); }
+  button:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+
+  .checkbox-line{ display:flex; align-items:center; gap:8px; margin-top:8px; font-size:.82rem; color:var(--ink-soft); }
+  .checkbox-line input{ width:15px; height:15px; accent-color:var(--accent); }
+
+  .summary-box{
+    background:var(--paper-2); border:1px solid var(--line); border-radius:12px; padding:14px;
+    font-family:'IBM Plex Mono', monospace; font-size:.76rem; white-space:pre-wrap; line-height:1.6;
+    max-height:260px; overflow:auto; color:var(--ink-soft);
+  }
+  .final-actions{ display:grid; gap:10px; margin-top:16px; }
+  .btn-wa{ background:#128C5A; color:#fff; }
+  .btn-wa:hover{ background:#0F7A4E; }
+  .btn-wa svg{ width:18px; height:18px; }
+
+  .done-badge{
+    display:flex; align-items:center; gap:10px; background:var(--accent-wash); color:var(--accent-strong);
+    border-radius:12px; padding:12px 14px; font-size:.85rem; font-weight:600; margin-top:14px;
+  }
+
+  footer.foot{ text-align:center; margin-top:22px; font-size:.72rem; color:var(--ink-faint); }
+  footer.foot a{ color:var(--ink-soft); }
+
+  details.restore{
+    background:var(--gold-wash); border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+    margin-bottom:14px; font-size:.82rem;
+  }
+  details.restore summary{ cursor:pointer; font-weight:600; color:var(--gold); }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="brandmark">
+      <div class="seal">
+        <img src="logo.png" alt="Terceirizza">
+      </div>
+      <div>
+        <p class="kicker">Terceirizza Contabilidade</p>
+        <h1>Dossiê de Abertura<br/>e Alteração de Empresa</h1>
+      </div>
+    </div>
+  </header>
+
+  <div id="restoreNotice"></div>
+
+  <div class="progress-rail">
+    <div class="progress-meta">
+      <span class="section-chip" id="sectionChip">Início</span>
+      <span>Etapa <b id="stepNow">1</b> de <b id="stepTotal">1</b></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="card" id="card"></div>
+
+  <footer class="foot">Dúvidas a qualquer momento? Fale com a Terceirizza pelo WhatsApp. Nada aqui é enviado automaticamente até você tocar em enviar.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "terceirizza_dossie_cnpj_v1";
+
+  var state = {
+    tipo: "", cnpjExistente: "",
+    numSocios: 0,
+    socios: [],
+    socioAdminIndex: 0,
+    cotas: [],
+    irpf2025Enviou: null, irpf2025Recibo: "",
+    irpf2026Enviou: null, irpf2026Recibo: "",
+    enderecoResidencial: "",
+    emailComercial: "", celularComercial: "",
+    razaoSocial1: "", razaoSocial2: "", nomeFantasia: "",
+    enderecoComercial: "", iptu: "", metragem: "",
+    atendimento: "", horarioFuncionamento: "",
+    capitalSocial: "",
+    atividades: "",
+    faturamento: ""
+  };
+
+  function blankSocio(){
+    return { nome:"", nascimento:"", naturalidade:"", cpf:"", rg:"", orgao:"",
+      tituloEleitor:"", tituloNaoPossui:false, estadoCivil:"", regime:"",
+      nomeMae:"", nomePai:"", nomePaiNaoSei:false };
+  }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      var parsed = JSON.parse(raw);
+      Object.assign(state, parsed);
+      if(state.numSocios && (!state.socios || !state.socios.length)){
+        state.socios = [];
+        for(var i=0;i<state.numSocios;i++) state.socios.push(blankSocio());
+      }
+      document.getElementById("restoreNotice").innerHTML =
+        '<details class="restore" open><summary>Continuamos de onde você parou</summary>' +
+        'Encontramos respostas salvas neste aparelho. Você pode seguir preenchendo ou começar do zero. ' +
+        '<div style="margin-top:8px"><button type="button" class="btn btn-ghost" id="clearDraftBtn" style="padding:8px 12px;font-size:.78rem">Começar do zero</button></div></details>';
+      document.getElementById("clearDraftBtn").addEventListener("click", function(){
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      });
+    }catch(e){}
+  }
+
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  function esc(s){
+    return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---- masks ----
+  function maskCPF(v){ v=v.replace(/\D/g,"").slice(0,11);
+    v=v.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+    return v; }
+  function maskCNPJ(v){ v=v.replace(/\D/g,"").slice(0,14);
+    v=v.replace(/(\d{2})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1/$2").replace(/(\d{4})(\d{1,2})$/,"$1-$2");
+    return v; }
+  function maskCEPin(v){ v=v.replace(/\D/g,"").slice(0,8); v=v.replace(/(\d{5})(\d{1,3})$/,"$1-$2"); return v; }
+  function maskFone(v){ v=v.replace(/\D/g,"").slice(0,11);
+    if(v.length>10) v=v.replace(/(\d{2})(\d{5})(\d{0,4})/,"($1) $2-$3");
+    else v=v.replace(/(\d{2})(\d{4})(\d{0,4})/,"($1) $2-$3");
+    return v.trim(); }
+  function maskMoney(v){
+    v=v.replace(/\D/g,"");
+    if(!v) return "";
+    var n=(parseInt(v,10)/100).toFixed(2);
+    var parts=n.split(".");
+    parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,".");
+    return "R$ " + parts[0] + "," + parts[1];
+  }
+
+  // ---- step engine ----
+  var steps = [];
+
+  function buildSteps(){
+    steps = [];
+    steps.push({ key:"tipo", section:"Início", render:renderTipo, validate:validateTipo });
+    steps.push({ key:"numSocios", section:"Sócios", render:renderNumSocios, validate:validateNumSocios });
+
+    var n = state.numSocios || 0;
+    for(var i=0;i<n;i++){
+      (function(idx){
+        steps.push({
+          key:"socio"+idx, section:"Sócios",
+          render:function(root){ renderSocio(root, idx); },
+          validate:function(){ return validateSocio(idx); }
+        });
+      })(i);
+    }
+    if(n>0){
+      steps.push({ key:"quotas", section:"Sócios", render:renderQuotas, validate:validateQuotas });
+    }
+    steps.push({ key:"irpf", section:"Financeiro", render:renderIRPF, validate:validateIRPF });
+    steps.push({ key:"enderecoResidencial", section:"Endereço", render:renderEnderecoResidencial, validate:function(){ return !!state.enderecoResidencial.trim(); } });
+    steps.push({ key:"contato", section:"Contato", render:renderContato, validate:validateContato });
+    steps.push({ key:"razaoSocial", section:"Empresa", render:renderRazaoSocial, validate:validateRazaoSocial });
+    steps.push({ key:"enderecoComercial", section:"Endereço", render:renderEnderecoComercial, validate:validateEnderecoComercial });
+    steps.push({ key:"atendimento", section:"Empresa", render:renderAtendimento, validate:validateAtendimento });
+    steps.push({ key:"capital", section:"Financeiro", render:renderCapital, validate:function(){ return !!state.capitalSocial.trim(); } });
+    steps.push({ key:"atividades", section:"Empresa", render:renderAtividades, validate:function(){ return state.atividades.trim().length>3; } });
+    steps.push({ key:"faturamento", section:"Financeiro", render:renderFaturamento, validate:function(){ return !!state.faturamento; } });
+    steps.push({ key:"final", section:"Concluir", render:renderFinal, validate:function(){ return true; } });
+  }
+
+  var cur = 0;
+
+  function goTo(i){
+    cur = Math.max(0, Math.min(steps.length-1, i));
+    save();
+    renderCard();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function next(){
+    var step = steps[cur];
+    var ok = step.validate();
+    if(!ok){ renderCard(true); return; }
+    if(cur === steps.length-1) return;
+    buildSteps(); // in case numSocios/etc changed step list length upstream
+    goTo(Math.min(cur+1, steps.length-1));
+  }
+  function back(){ if(cur>0) goTo(cur-1); }
+
+  function updateProgress(){
+    document.getElementById("stepNow").textContent = cur+1;
+    document.getElementById("stepTotal").textContent = steps.length;
+    document.getElementById("sectionChip").textContent = steps[cur].section;
+    var pct = Math.round(((cur)/(steps.length-1||1))*100);
+    document.getElementById("progressFill").style.width = pct+"%";
+  }
+
+  function renderCard(showErrors){
+    var root = document.getElementById("card");
+    root.innerHTML = "";
+    steps[cur].render(root, !!showErrors);
+    updateProgress();
+  }
+
+  function field(labelText, inputHtml, hint, errId){
+    return '<div class="field">' +
+      '<label class="flabel">'+labelText+'</label>' +
+      inputHtml +
+      (hint ? '<p class="hint">'+hint+'</p>' : '') +
+      (errId ? '<p class="err" id="'+errId+'">Preencha este campo para continuar.</p>' : '') +
+      '</div>';
+  }
+
+  function stepHeader(title, sub){
+    return '<div class="step-head"><p class="step-title">'+title+'</p>' + (sub?'<p class="step-sub">'+sub+'</p>':'') + '</div>';
+  }
+
+  function navButtons(nextLabel){
+    return '<div class="nav-row">' +
+      (cur>0 ? '<button type="button" class="btn btn-ghost" id="btnBack">Voltar</button>' : '') +
+      '<button type="button" class="btn btn-primary" id="btnNext">'+(nextLabel||"Continuar")+'</button>' +
+    '</div>';
+  }
+
+  function wireNav(afterValidateFail){
+    var b = document.getElementById("btnNext");
+    if(b) b.addEventListener("click", next);
+    var k = document.getElementById("btnBack");
+    if(k) k.addEventListener("click", back);
+  }
+
+  function bindText(id, key, maskFn){
+    var el = document.getElementById(id);
+    el.value = state[key] || "";
+    el.addEventListener("input", function(){
+      var v = el.value;
+      if(maskFn){ v = maskFn(v); el.value = v; }
+      state[key] = v;
+      save();
+    });
+  }
+
+  // ---- STEP: tipo ----
+  function renderTipo(root){
+    root.innerHTML =
+      stepHeader("Vamos começar", "É uma empresa nova ou você quer alterar uma empresa já existente?") +
+      '<div class="choice-grid">' +
+        choiceHtml("tipoRadio","abertura", state.tipo==="abertura", "Abertura de empresa nova", "Você ainda não tem CNPJ para este negócio.") +
+        choiceHtml("tipoRadio","alteracao", state.tipo==="alteracao", "Alteração de empresa existente", "Sua empresa já tem CNPJ e você quer mudar algo (sócio, endereço, atividade, etc.).") +
+      '</div>' +
+      '<div id="cnpjWrap" style="margin-top:14px; display:'+(state.tipo==="alteracao"?"block":"none")+'">' +
+        field("Número do CNPJ atual *", '<input type="text" id="cnpjInput" data-mono placeholder="00.000.000/0000-00" inputmode="numeric">', "", "errCnpj") +
+      '</div>' +
+      navButtons();
+
+    Array.prototype.forEach.call(root.querySelectorAll('input[name="tipoRadio"]'), function(r){
+      r.addEventListener("change", function(){
+        state.tipo = r.value; save();
+        document.getElementById("cnpjWrap").style.display = (r.value==="alteracao") ? "block" : "none";
+        Array.prototype.forEach.call(root.querySelectorAll(".choice"), function(c){ c.classList.remove("selected"); });
+        r.closest(".choice").classList.add("selected");
+      });
+    });
+    var cnpjInput = document.getElementById("cnpjInput");
+    if(cnpjInput) bindText("cnpjInput","cnpjExistente", maskCNPJ);
+    wireNav();
+  }
+  function choiceHtml(name, value, checked, title, desc){
+    return '<label class="choice'+(checked?" selected":"")+'">' +
+      '<input type="radio" name="'+name+'" value="'+value+'" '+(checked?"checked":"")+'>' +
+      '<span class="ctext"><strong>'+title+'</strong><span>'+desc+'</span></span>' +
+    '</label>';
+  }
+  function validateTipo(){
+    if(!state.tipo) return false;
+    if(state.tipo==="alteracao" && state.cnpjExistente.replace(/\D/g,"").length<14) return false;
+    return true;
+  }
+
+  // ---- STEP: numSocios ----
+  function renderNumSocios(root){
+    root.innerHTML =
+      stepHeader("Quantos sócios?", "Conte quantas pessoas vão compor o quadro societário desta empresa (máximo 3 neste formulário).") +
+      '<div class="num-stepper">' +
+        [1,2,3].map(function(n){
+          return '<div class="num-btn'+(state.numSocios===n?" selected":"")+'" data-n="'+n+'">'+n+(n===1?" sócio":" sócios")+'</div>';
+        }).join("") +
+      '</div>' +
+      navButtons();
+    Array.prototype.forEach.call(root.querySelectorAll(".num-btn"), function(b){
+      b.addEventListener("click", function(){
+        var n = parseInt(b.getAttribute("data-n"),10);
+        state.numSocios = n;
+        while(state.socios.length < n) state.socios.push(blankSocio());
+        state.socios = state.socios.slice(0,n);
+        save();
+        Array.prototype.forEach.call(root.querySelectorAll(".num-btn"), function(x){ x.classList.remove("selected"); });
+        b.classList.add("selected");
+      });
+    });
+    wireNav();
+  }
+  function validateNumSocios(){ return state.numSocios>0; }
+
+  // ---- STEP: socio ----
+  function renderSocio(root, idx){
+    var s = state.socios[idx];
+    var casadoLike = (s.estadoCivil==="Casado(a)" || s.estadoCivil==="União estável");
+    root.innerHTML =
+      '<span class="socio-tag">SÓCIO '+(idx+1)+' de '+state.numSocios+'</span>' +
+      stepHeader("Dados do sócio "+(idx+1), "Essas informações vão para o contrato social e o CNPJ. Preencha como está no RG/CPF.") +
+      field("Nome completo *", '<input type="text" id="f_nome">',"","") +
+      '<div class="row2">' +
+        field("Data de nascimento *", '<input type="text" id="f_nasc" placeholder="DD/MM/AAAA" inputmode="numeric">') +
+        field("Naturalidade *", '<input type="text" id="f_nat" placeholder="Cidade/UF">') +
+      '</div>' +
+      '<div class="row2">' +
+        field("CPF *", '<input type="text" id="f_cpf" data-mono placeholder="000.000.000-00" inputmode="numeric">') +
+        field("RG *", '<input type="text" id="f_rg" data-mono placeholder="0000000000">') +
+      '</div>' +
+      field("Órgão expedidor do RG *", '<input type="text" id="f_orgao" placeholder="Ex: SSP/RS">') +
+      field("Título de eleitor",
+        '<input type="text" id="f_titulo" data-mono placeholder="0000 0000 0000" '+(s.tituloNaoPossui?"disabled":"")+'>' +
+        '<label class="checkbox-line"><input type="checkbox" id="f_semTitulo" '+(s.tituloNaoPossui?"checked":"")+'> Não possuo título de eleitor</label>'
+      ) +
+      field("Estado civil *",
+        '<select id="f_estadoCivil"><option value="">Selecione</option>' +
+        ["Solteiro(a)","Casado(a)","União estável","Divorciado(a)","Viúvo(a)","Separado(a) judicialmente"].map(function(o){
+          return '<option value="'+o+'" '+(s.estadoCivil===o?"selected":"")+'>'+o+'</option>';
+        }).join("") + '</select>'
+      ) +
+      '<div class="field" id="regimeWrap" style="display:'+(casadoLike?"block":"none")+'">' +
+        '<label class="flabel">Regime de casamento *</label>' +
+        '<select id="f_regime"><option value="">Selecione</option>' +
+        ["Comunhão parcial de bens","Comunhão universal de bens","Separação total de bens","Participação final nos aquestos"].map(function(o){
+          return '<option value="'+o+'" '+(s.regime===o?"selected":"")+'>'+o+'</option>';
+        }).join("") + '</select>' +
+      '</div>' +
+      field("Nome completo da mãe *", '<input type="text" id="f_mae">') +
+      field("Nome completo do pai",
+        '<input type="text" id="f_pai" '+(s.nomePaiNaoSei?"disabled":"")+'>' +
+        '<label class="checkbox-line"><input type="checkbox" id="f_semPai" '+(s.nomePaiNaoSei?"checked":"")+'> Não sei / não consta</label>'
+      ) +
+      navButtons();
+
+    function bindS(id, key){ var el=document.getElementById(id); el.value=s[key]||""; el.addEventListener("input",function(){ s[key]=el.value; save(); }); }
+    bindS("f_nome","nome"); bindS("f_nat","naturalidade"); bindS("f_orgao","orgao"); bindS("f_mae","nomeMae");
+    var elNasc=document.getElementById("f_nasc"); elNasc.value=s.nascimento||"";
+    elNasc.addEventListener("input",function(){ var v=elNasc.value.replace(/\D/g,"").slice(0,8);
+      v=v.replace(/(\d{2})(\d)/,"$1/$2").replace(/(\d{2})\/(\d{2})(\d)/,"$1/$2/$3"); elNasc.value=v; s.nascimento=v; save(); });
+    var elCpf=document.getElementById("f_cpf"); elCpf.value=s.cpf||"";
+    elCpf.addEventListener("input",function(){ elCpf.value=maskCPF(elCpf.value); s.cpf=elCpf.value; save(); });
+    var elRg=document.getElementById("f_rg"); elRg.value=s.rg||"";
+    elRg.addEventListener("input",function(){ s.rg=elRg.value; save(); });
+    var elTitulo=document.getElementById("f_titulo"); elTitulo.value=s.tituloEleitor||"";
+    elTitulo.addEventListener("input",function(){ s.tituloEleitor=elTitulo.value; save(); });
+    document.getElementById("f_semTitulo").addEventListener("change",function(e){
+      s.tituloNaoPossui = e.target.checked; elTitulo.disabled = e.target.checked;
+      if(e.target.checked){ s.tituloEleitor=""; elTitulo.value=""; } save();
+    });
+    var elPai=document.getElementById("f_pai"); elPai.value=s.nomePai||"";
+    elPai.addEventListener("input",function(){ s.nomePai=elPai.value; save(); });
+    document.getElementById("f_semPai").addEventListener("change",function(e){
+      s.nomePaiNaoSei = e.target.checked; elPai.disabled = e.target.checked;
+      if(e.target.checked){ s.nomePai=""; elPai.value=""; } save();
+    });
+    document.getElementById("f_estadoCivil").addEventListener("change",function(e){
+      s.estadoCivil = e.target.value; save();
+      var show = (e.target.value==="Casado(a)" || e.target.value==="União estável");
+      document.getElementById("regimeWrap").style.display = show ? "block":"none";
+    });
+    var regimeSel = document.getElementById("f_regime");
+    if(regimeSel) regimeSel.addEventListener("change",function(e){ s.regime=e.target.value; save(); });
+
+    wireNav();
+  }
+  function validateSocio(idx){
+    var s = state.socios[idx];
+    if(!s.nome.trim() || !s.nascimento.trim() || !s.naturalidade.trim()) return false;
+    if(s.cpf.replace(/\D/g,"").length<11) return false;
+    if(!s.rg.trim() || !s.orgao.trim()) return false;
+    if(!s.estadoCivil) return false;
+    if((s.estadoCivil==="Casado(a)"||s.estadoCivil==="União estável") && !s.regime) return false;
+    if(!s.nomeMae.trim()) return false;
+    return true;
+  }
+
+  // ---- STEP: quotas (admin + percentuais) ----
+  function renderQuotas(root){
+    var names = state.socios.map(function(s,i){ return s.nome.trim() || ("Sócio "+(i+1)); });
+    if(state.cotas.length !== state.numSocios){
+      state.cotas = names.map(function(_, i){ return state.cotas[i] || ""; });
+    }
+    root.innerHTML =
+      stepHeader("Administração e cotas", "Quem vai assinar como responsável perante a Receita Federal, e qual o percentual de participação de cada um?") +
+      field("Sócio administrador *",
+        '<select id="f_admin">' + names.map(function(n,i){
+          return '<option value="'+i+'" '+(state.socioAdminIndex===i?"selected":"")+'>'+esc(n)+'</option>';
+        }).join("") + '</select>',
+        "Será o responsável pelo certificado digital e pelo acesso à Receita Federal."
+      ) +
+      '<div class="field"><label class="flabel">Percentual de cotas de cada sócio *</label>' +
+      names.map(function(n,i){
+        return '<div class="quota-row"><span class="qname">'+esc(n)+'</span><input type="text" data-mono inputmode="numeric" class="qinput" data-i="'+i+'" value="'+(state.cotas[i]||"")+'" placeholder="0">%</div>';
+      }).join("") +
+      '<div class="quota-total" id="quotaTotal">Total: 0%</div>' +
+      '</div>' +
+      navButtons();
+
+    document.getElementById("f_admin").addEventListener("change", function(e){ state.socioAdminIndex = parseInt(e.target.value,10); save(); });
+
+    function recalcTotal(){
+      var total = state.cotas.reduce(function(a,v){ return a + (parseInt(v,10)||0); },0);
+      var box = document.getElementById("quotaTotal");
+      box.textContent = "Total: " + total + "%";
+      box.className = "quota-total " + (total===100 ? "ok":"bad");
+    }
+    Array.prototype.forEach.call(root.querySelectorAll(".qinput"), function(inp){
+      inp.addEventListener("input", function(){
+        var i = parseInt(inp.getAttribute("data-i"),10);
+        var v = inp.value.replace(/\D/g,"").slice(0,3);
+        if(parseInt(v,10)>100) v="100";
+        inp.value = v;
+        state.cotas[i] = v; save();
+        recalcTotal();
+      });
+    });
+    recalcTotal();
+    wireNav();
+  }
+  function validateQuotas(){
+    var total = state.cotas.reduce(function(a,v){ return a + (parseInt(v,10)||0); },0);
+    return total===100;
+  }
+
+  // ---- STEP: IRPF ----
+  function renderIRPF(root){
+    root.innerHTML =
+      stepHeader("Imposto de Renda do responsável", "Só precisamos do recibo de quem vai ser o sócio administrador.") +
+      field("Você enviou a Declaração de IRPF 2025? *",
+        yesNoHtml("irpf25", state.irpf2025Enviou)
+      ) +
+      '<div class="field" id="recibo25Wrap" style="display:'+(state.irpf2025Enviou===true?"block":"none")+'">' +
+        field("Número do recibo (IRPF 2025) *", '<input type="text" id="f_recibo25" data-mono>') +
+      '</div>' +
+      field("Você já enviou a Declaração de IRPF 2026? *",
+        yesNoHtml("irpf26", state.irpf2026Enviou)
+      ) +
+      '<div class="field" id="recibo26Wrap" style="display:'+(state.irpf2026Enviou===true?"block":"none")+'">' +
+        field("Número do recibo (IRPF 2026) *", '<input type="text" id="f_recibo26" data-mono>') +
+      '</div>' +
+      navButtons();
+
+    wireYesNo(root, "irpf25", function(val){
+      state.irpf2025Enviou = val; save();
+      document.getElementById("recibo25Wrap").style.display = val ? "block":"none";
+    });
+    wireYesNo(root, "irpf26", function(val){
+      state.irpf2026Enviou = val; save();
+      document.getElementById("recibo26Wrap").style.display = val ? "block":"none";
+    });
+    var r25 = document.getElementById("f_recibo25"); if(r25) bindText("f_recibo25","irpf2025Recibo");
+    var r26 = document.getElementById("f_recibo26"); if(r26) bindText("f_recibo26","irpf2026Recibo");
+    wireNav();
+  }
+  function yesNoHtml(name, val){
+    return '<div class="choice-grid" style="grid-template-columns:1fr 1fr; display:grid; gap:10px">' +
+      '<label class="choice'+(val===true?" selected":"")+'" style="justify-content:center"><input type="radio" name="'+name+'" value="sim" '+(val===true?"checked":"")+'><span class="ctext"><strong>Sim</strong></span></label>' +
+      '<label class="choice'+(val===false?" selected":"")+'" style="justify-content:center"><input type="radio" name="'+name+'" value="nao" '+(val===false?"checked":"")+'><span class="ctext"><strong>Não</strong></span></label>' +
+    '</div>';
+  }
+  function wireYesNo(root, name, cb){
+    Array.prototype.forEach.call(root.querySelectorAll('input[name="'+name+'"]'), function(r){
+      r.addEventListener("change", function(){
+        Array.prototype.forEach.call(root.querySelectorAll('input[name="'+name+'"]'), function(x){ x.closest(".choice").classList.remove("selected"); });
+        r.closest(".choice").classList.add("selected");
+        cb(r.value==="sim");
+      });
+    });
+  }
+  function validateIRPF(){
+    if(state.irpf2025Enviou===null || state.irpf2026Enviou===null) return false;
+    if(state.irpf2025Enviou && !state.irpf2025Recibo.trim()) return false;
+    if(state.irpf2026Enviou && !state.irpf2026Recibo.trim()) return false;
+    return true;
+  }
+
+  // ---- STEP: endereço residencial ----
+  function renderEnderecoResidencial(root){
+    root.innerHTML =
+      stepHeader("Endereço residencial", "Endereço completo do sócio administrador, com CEP.") +
+      field("Endereço residencial completo *", '<textarea id="f_end" placeholder="Rua, número, bairro, cidade/UF, CEP"></textarea>') +
+      navButtons();
+    var el = document.getElementById("f_end"); el.value = state.enderecoResidencial||"";
+    el.addEventListener("input", function(){ state.enderecoResidencial = el.value; save(); });
+    wireNav();
+  }
+
+  // ---- STEP: contato ----
+  function renderContato(root){
+    root.innerHTML =
+      stepHeader("Contato comercial", "Esse e-mail e celular vão aparecer no Cartão CNPJ da empresa.") +
+      field("E-mail comercial *", '<input type="text" id="f_email" placeholder="nome@empresa.com">') +
+      field("Celular comercial *", '<input type="text" id="f_cel" data-mono placeholder="(00) 00000-0000" inputmode="numeric">') +
+      navButtons();
+    bindText("f_email","emailComercial");
+    var el = document.getElementById("f_cel"); el.value = state.celularComercial||"";
+    el.addEventListener("input", function(){ el.value = maskFone(el.value); state.celularComercial = el.value; save(); });
+    wireNav();
+  }
+  function validateContato(){
+    return /\S+@\S+\.\S+/.test(state.emailComercial) && state.celularComercial.replace(/\D/g,"").length>=10;
+  }
+
+  // ---- STEP: razão social ----
+  function renderRazaoSocial(root){
+    root.innerHTML =
+      stepHeader("Nome da empresa", "A Receita Federal pode recusar o primeiro nome — por isso pedimos uma segunda opção.") +
+      field("Opção 1 de Razão Social *", '<input type="text" id="f_rs1" placeholder="Ex: Comércio Varejista Silva LTDA">') +
+      field("Opção 2 de Razão Social *", '<input type="text" id="f_rs2" placeholder="Ex: Soluções Administrativas LTDA">') +
+      field("Nome Fantasia *", '<input type="text" id="f_fantasia" placeholder="Como o público vai conhecer a empresa">') +
+      navButtons();
+    bindText("f_rs1","razaoSocial1"); bindText("f_rs2","razaoSocial2"); bindText("f_fantasia","nomeFantasia");
+    wireNav();
+  }
+  function validateRazaoSocial(){ return state.razaoSocial1.trim() && state.razaoSocial2.trim() && state.nomeFantasia.trim(); }
+
+  // ---- STEP: endereço comercial ----
+  function renderEnderecoComercial(root){
+    root.innerHTML =
+      stepHeader("Endereço do estabelecimento", "Onde a empresa vai funcionar.") +
+      field("Endereço comercial completo (com CEP) *", '<textarea id="f_endc" placeholder="Rua, número, bairro, cidade/UF, CEP"></textarea>') +
+      '<div class="row2">' +
+        field("Número do IPTU *", '<input type="text" id="f_iptu" data-mono>') +
+        field("Metragem do imóvel (m²) *", '<input type="text" id="f_metragem" inputmode="numeric" placeholder="Ex: 45">') +
+      '</div>' +
+      navButtons();
+    bindText("f_endc","enderecoComercial"); bindText("f_iptu","iptu");
+    var m = document.getElementById("f_metragem"); m.value = state.metragem||"";
+    m.addEventListener("input", function(){ m.value = m.value.replace(/[^\d.,]/g,""); state.metragem = m.value; save(); });
+    wireNav();
+  }
+  function validateEnderecoComercial(){ return state.enderecoComercial.trim() && state.iptu.trim() && state.metragem.trim(); }
+
+  // ---- STEP: atendimento ----
+  function renderAtendimento(root){
+    root.innerHTML =
+      stepHeader("Como o negócio atende?", "Isso muda como o endereço é registrado.") +
+      '<div class="choice-grid">' +
+        choiceHtml("atendRadio","presencial", state.atendimento==="presencial", "Loja física / atendimento presencial", "Clientes vão até o endereço comercial.") +
+        choiceHtml("atendRadio","homeoffice", state.atendimento==="homeoffice", "Home office / ponto de referência", "Sem atendimento presencial no local — serviço prestado no cliente ou remoto.") +
+      '</div>' +
+      '<div class="field" id="horarioWrap" style="display:'+(state.atendimento==="presencial"?"block":"none")+'; margin-top:14px;">' +
+        field("Horário de funcionamento *", '<input type="text" id="f_horario" placeholder="Ex: Seg a sex, 8h às 18h">') +
+      '</div>' +
+      navButtons();
+    Array.prototype.forEach.call(root.querySelectorAll('input[name="atendRadio"]'), function(r){
+      r.addEventListener("change", function(){
+        state.atendimento = r.value; save();
+        document.getElementById("horarioWrap").style.display = (r.value==="presencial") ? "block":"none";
+        Array.prototype.forEach.call(root.querySelectorAll(".choice"), function(c){ c.classList.remove("selected"); });
+        r.closest(".choice").classList.add("selected");
+      });
+    });
+    var h = document.getElementById("f_horario"); if(h) bindText("f_horario","horarioFuncionamento");
+    wireNav();
+  }
+  function validateAtendimento(){
+    if(!state.atendimento) return false;
+    if(state.atendimento==="presencial" && !state.horarioFuncionamento.trim()) return false;
+    return true;
+  }
+
+  // ---- STEP: capital social ----
+  function renderCapital(root){
+    root.innerHTML =
+      stepHeader("Capital social", "É o valor que você já investiu no negócio: documentação, estoque, materiais, caução do aluguel, equipamentos, etc. Some tudo.") +
+      field("Capital social *", '<input type="text" id="f_capital" data-mono inputmode="numeric" placeholder="R$ 0,00">') +
+      navButtons();
+    var el = document.getElementById("f_capital"); el.value = state.capitalSocial||"";
+    el.addEventListener("input", function(){ el.value = maskMoney(el.value); state.capitalSocial = el.value; save(); });
+    wireNav();
+  }
+
+  // ---- STEP: atividades ----
+  function renderAtividades(root){
+    root.innerHTML =
+      stepHeader("Atividades do negócio", "Descreva tudo o que a empresa vai vender ou os serviços que vai prestar. Usamos isso para encontrar os CNAEs corretos.") +
+      field("Produtos e/ou serviços *", '<textarea id="f_ativ" placeholder="Ex: venda de roupas no varejo; conserto de eletrodomésticos; consultoria financeira..."></textarea>') +
+      navButtons();
+    var el = document.getElementById("f_ativ"); el.value = state.atividades||"";
+    el.addEventListener("input", function(){ state.atividades = el.value; save(); });
+    wireNav();
+  }
+
+  // ---- STEP: faturamento ----
+  function renderFaturamento(root){
+    var opts = ["Até R$ 180 mil/ano","Até R$ 360 mil/ano","Até R$ 4,8 milhões/ano","Até R$ 300 milhões/ano"];
+    root.innerHTML =
+      stepHeader("Faturamento projetado", "Sua estimativa realista para os próximos 2 anos — isso define o enquadramento correto da empresa.") +
+      '<div class="choice-grid">' +
+        opts.map(function(o){
+          return '<label class="choice'+(state.faturamento===o?" selected":"")+'"><input type="radio" name="fatRadio" value="'+o+'" '+(state.faturamento===o?"checked":"")+'><span class="ctext"><strong>'+o+'</strong></span></label>';
+        }).join("") +
+      '</div>' +
+      navButtons("Ver resumo");
+    Array.prototype.forEach.call(root.querySelectorAll('input[name="fatRadio"]'), function(r){
+      r.addEventListener("change", function(){
+        state.faturamento = r.value; save();
+        Array.prototype.forEach.call(root.querySelectorAll(".choice"), function(c){ c.classList.remove("selected"); });
+        r.closest(".choice").classList.add("selected");
+      });
+    });
+    wireNav();
+  }
+
+  // ---- FINAL ----
+  function buildSummary(){
+    var lines = [];
+    lines.push("*DOSSIÊ CNPJ — Terceirizza Contabilidade*");
+    lines.push(state.tipo==="alteracao" ? "Tipo: Alteração de empresa (CNPJ "+state.cnpjExistente+")" : "Tipo: Abertura de empresa nova");
+    lines.push("");
+    state.socios.forEach(function(s, i){
+      lines.push("— SÓCIO "+(i+1)+" —");
+      lines.push("Nome: "+s.nome);
+      lines.push("Nascimento: "+s.nascimento+" | Naturalidade: "+s.naturalidade);
+      lines.push("CPF: "+s.cpf+" | RG: "+s.rg+" ("+s.orgao+")");
+      lines.push("Título de eleitor: "+(s.tituloNaoPossui ? "não possui" : s.tituloEleitor));
+      lines.push("Estado civil: "+s.estadoCivil + (s.regime ? " — "+s.regime : ""));
+      lines.push("Mãe: "+s.nomeMae+" | Pai: "+(s.nomePaiNaoSei ? "não informado" : s.nomePai));
+      lines.push("Cota: "+(state.cotas[i]||"0")+"%");
+      lines.push("");
+    });
+    var adminName = state.socios[state.socioAdminIndex] ? (state.socios[state.socioAdminIndex].nome || ("Sócio "+(state.socioAdminIndex+1))) : "";
+    lines.push("Sócio administrador: "+adminName);
+    lines.push("IRPF 2025: "+(state.irpf2025Enviou ? "recibo "+state.irpf2025Recibo : "não enviei"));
+    lines.push("IRPF 2026: "+(state.irpf2026Enviou ? "recibo "+state.irpf2026Recibo : "não enviei"));
+    lines.push("");
+    lines.push("Endereço residencial (responsável): "+state.enderecoResidencial);
+    lines.push("E-mail comercial: "+state.emailComercial+" | Celular comercial: "+state.celularComercial);
+    lines.push("");
+    lines.push("Razão social opção 1: "+state.razaoSocial1);
+    lines.push("Razão social opção 2: "+state.razaoSocial2);
+    lines.push("Nome fantasia: "+state.nomeFantasia);
+    lines.push("");
+    lines.push("Endereço comercial: "+state.enderecoComercial);
+    lines.push("IPTU: "+state.iptu+" | Metragem: "+state.metragem+" m²");
+    lines.push("Atendimento: "+(state.atendimento==="presencial" ? "Loja física/presencial — horário: "+state.horarioFuncionamento : "Home office / sem atendimento presencial"));
+    lines.push("");
+    lines.push("Capital social: "+state.capitalSocial);
+    lines.push("Atividades: "+state.atividades);
+    lines.push("Faturamento projetado: "+state.faturamento);
+    return lines.join("\n");
+  }
+
+  function renderFinal(root){
+    var summary = buildSummary();
+    root.innerHTML =
+      stepHeader("Tudo pronto!", "Confira o resumo abaixo e envie para a Terceirizza pelo WhatsApp. Depois disso vamos começar o processo na Junta Comercial.") +
+      '<textarea class="summary-box" id="summaryText" readonly rows="10">'+esc(summary).replace(/&#39;/g,"'")+'</textarea>' +
+      '<div class="final-actions">' +
+        '<button type="button" class="btn btn-wa" id="btnWhats"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.33 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.85 9.85 0 0 0 12.04 2zm0 1.67c2.24 0 4.35.87 5.93 2.46a8.3 8.3 0 0 1 2.45 5.92c0 4.62-3.76 8.38-8.38 8.38a8.4 8.4 0 0 1-4.26-1.16l-.3-.18-3.14.82.84-3.06-.2-.32a8.3 8.3 0 0 1-1.28-4.44c0-4.62 3.76-8.42 8.34-8.42zm-3.2 4.36c-.16 0-.42.06-.64.3-.22.24-.85.83-.85 2.03 0 1.2.87 2.36.99 2.52.12.16 1.7 2.6 4.14 3.64.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28-.24-.12-1.44-.71-1.66-.79-.22-.08-.38-.12-.55.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.93-1.19-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.36-.76-1.86-.2-.48-.4-.42-.55-.42z"/></svg> Enviar pelo WhatsApp</button>' +
+        '<button type="button" class="btn btn-ghost" id="btnCopy">Copiar resumo</button>' +
+      '</div>' +
+      '<div id="doneBadge"></div>' +
+      navButtons("Concluir");
+
+    document.getElementById("btnWhats").addEventListener("click", function(){
+      var url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(summary);
+      window.open(url, "_blank", "noopener");
+      showDone();
+    });
+    document.getElementById("btnCopy").addEventListener("click", function(){
+      var ta = document.getElementById("summaryText");
+      ta.focus(); ta.select();
+      var ok = false;
+      try{ ok = document.execCommand("copy"); }catch(e){ ok = false; }
+      if(!ok && navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(summary).then(function(){ showDone("Resumo copiado!"); }).catch(function(){});
+      } else if(ok){
+        showDone("Resumo copiado!");
+      }
+    });
+    function showDone(msg){
+      document.getElementById("doneBadge").innerHTML =
+        '<div class="done-badge">✓ '+(msg||"Se o WhatsApp não abriu sozinho, cole o resumo copiado na conversa com a Terceirizza.")+'</div>';
+    }
+    var b = document.getElementById("btnNext");
+    b.textContent = "Concluir";
+    b.addEventListener("click", function(){ /* stays on final step */ });
+    wireNav();
+  }
+
+  // ---- init ----
+  load();
+  buildSteps();
+  renderCard();
+})();
+</script>
