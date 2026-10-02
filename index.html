@@ -153,9 +153,9 @@
   .choice .ctext span{ font-size:.76rem; color:var(--ink-soft); }
   .choice.selected{ border-color:var(--accent); background:var(--accent-wash); }
 
-  .num-stepper{ display:flex; gap:8px; }
+  .num-stepper{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .num-btn{
-    flex:1; padding:14px 0; text-align:center; border-radius:12px; border:1.5px solid var(--line);
+    padding:14px 0; text-align:center; border-radius:12px; border:1.5px solid var(--line);
     background:var(--paper-2); font-weight:700; font-size:1.05rem; cursor:pointer; font-family:'Fraunces',serif;
   }
   .num-btn.selected{ border-color:var(--accent); background:var(--accent); color:var(--accent-contrast); }
@@ -521,9 +521,9 @@
   // ---- STEP: numSocios ----
   function renderNumSocios(root){
     root.innerHTML =
-      stepHeader("Quantos sócios?", "Conte quantas pessoas vão compor o quadro societário desta empresa (máximo 3 neste formulário).") +
+      stepHeader("Quantos sócios?", "Conte quantas pessoas vão compor o quadro societário desta empresa (máximo 6 neste formulário).") +
       '<div class="num-stepper">' +
-        [1,2,3].map(function(n){
+        [1,2,3,4,5,6].map(function(n){
           return '<div class="num-btn'+(state.numSocios===n?" selected":"")+'" data-n="'+n+'">'+n+(n===1?" sócio":" sócios")+'</div>';
         }).join("") +
       '</div>' +
